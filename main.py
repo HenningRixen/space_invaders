@@ -31,6 +31,13 @@ def show_score(x,y):
     screen.blit(score, (x, y))
 
 
+#game win
+win_font = pygame.font.Font("freesansbold.ttf", 32)
+
+def game_win_text():
+    win_text = win_font.render("WINNER WINNER CHICKEN DINNER", True, (255,255,255))
+    screen.blit(win_text, (150, 250))
+
 #game over
 over_font = pygame.font.Font("freesansbold.ttf", 64)
 
@@ -55,6 +62,42 @@ def fire_laser(x,y):
 def isCollision(enemy_x, enemy_y, laser_x, laser_y):
     distance = math.sqrt(((enemy_x - laser_x)**2) + ((enemy_y - laser_y)**2))
     if distance < 27:
+        return True
+    else:
+        return False
+
+#Boss enemy
+dragon_img = pygame.image.load("final-boss.png")
+dragon_x = 330
+dragon_y = 45
+dragon_x_change = 2
+
+def dragon(x,y):
+    screen.blit(dragon_img, (x,y))
+
+def is_Collision_Dragon(enemy_x, enemy_y, laser_x, laser_y):
+    distance = math.sqrt(((enemy_x - laser_x)**2) + ((enemy_y - laser_y)**2))
+    if distance < 70:
+        return True
+    else:
+        return False
+
+# Boss shots fire 
+fire_img = pygame.image.load("fire.png")
+fire_x = 330
+fire_y = 45
+fire_x_change = 0
+fire_y_change = 5
+fire_state = "ready"
+
+def dragon_fire(x,y):
+    global fire_state
+    fire_state = "fire"
+    screen.blit(fire_img, (x + 16, y + 10))
+
+def colission_dragon_fire(player_x, player_y, fire_x, fire_y):
+    dead = math.sqrt(((player_x - fire_x)**2) + ((player_y - fire_y)**2))
+    if dead < 70:
         return True
     else:
         return False
@@ -128,13 +171,41 @@ while running:
     for i in range(num_of_enemy):
 
         # game over 
-        if enemy_y[i] > 440:
+        if enemy_y[i] == 440:
             for j in range(num_of_enemy):
                 enemy_y[j] = 2000
             game_over_text()
             break
-            
-            
+
+        # Boss apearing   
+        if score_value >= 20:
+           for k in range(num_of_enemy):
+                #enemys away
+                enemy_y[k] = 3000
+
+                # dragon in 
+                dragon(dragon_x, dragon_y)
+    
+
+                
+                # dragon colission
+                colission = is_Collision_Dragon(dragon_x, dragon_y, laser_x, laser_y)
+                if colission:
+                    laser_y = 480
+                    laser_state = "ready"
+                    score_value += 10
+                
+                # dead by fire
+                dead = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
+                if dead:
+                    dragon_x = 2000
+                    game_over_text()
+                    break
+                #game win
+                if score_value >= 600:
+                    game_win_text()
+                    dragon_x = 2000
+                    break
 
         enemy_x[i] += enemy_x_change[i]
         if enemy_x[i] <= 0:
@@ -155,6 +226,29 @@ while running:
 
         enemy(enemy_x[i], enemy_y[i], i)
 
+
+    # dragon movement
+    
+    dragon_x += dragon_x_change
+    if dragon_x <= 0:
+        dragon_x_change = 2
+        
+    elif dragon_x >= 690:
+        dragon_x_change = -2
+
+    # dragon fire movement                  
+    if fire_state == "ready":
+        fire_x = dragon_x
+        dragon_fire(fire_x, fire_y)
+        fire_y -= fire_y_change
+
+    if fire_y <= 600:
+        fire_y = 45
+        fire_state = "ready"
+
+    if fire_state == "fire":
+        dragon_fire(fire_x, fire_y)
+        fire_y -= fire_y_change
 
     #bullet movement
     if laser_y <= 0:
