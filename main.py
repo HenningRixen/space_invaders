@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # intialize the pygame
 pygame.init()
@@ -17,6 +18,10 @@ pygame.display.set_caption("Space Invaders")
 icon = pygame.image.load("ufo.png")
 pygame.display.set_icon(icon)
 
+#score 
+
+score = 0
+
 # laser bullet
 laser_img = pygame.image.load("laser.png")
 laser_x = 0
@@ -30,15 +35,30 @@ def fire_laser(x,y):
     laser_state = "fire"
     screen.blit(laser_img, (x + 16, y + 10))
 
-# Enemy
-enemy_img = pygame.image.load("monster.png")
-enemy_x = random.randint(0, 800)
-enemy_y = random.randint(50, 150)
-enemy_x_change = 3
-enemy_y_change = 30
+def isCollision(enemy_x, enemy_y, laser_x, laser_y):
+    distance = math.sqrt(((enemy_x - laser_x)**2) + ((enemy_y - laser_y)**2))
+    if distance < 27:
+        return True
+    else:
+        return False
 
-def enemy(x, y):
-    screen.blit(enemy_img, (x, y))
+# Enemy
+enemy_img = []
+enemy_x = []
+enemy_y = []
+enemy_x_change = []
+enemy_y_change = []
+num_of_enemy = 4
+
+for i in range(num_of_enemy):
+    enemy_img.append(pygame.image.load("monster.png")) 
+    enemy_x.append(random.randint(0, 735))
+    enemy_y.append(random.randint(50, 150))
+    enemy_x_change.append(2)
+    enemy_y_change.append(30)
+
+def enemy(x, y, i):
+    screen.blit(enemy_img[i], (x, y))
 
 
 # Player
@@ -88,16 +108,28 @@ while running:
         player_x = 736
 
     # enemy movement
-    enemy_x += enemy_x_change
-    
-    # boarders
-    if enemy_x <= 0:
-        enemy_x_change = 3
-        enemy_y += enemy_y_change
-    elif enemy_x >= 736:
-        enemy_x_change = -3
-        enemy_y += enemy_y_change
-    
+    for i in range(num_of_enemy):
+        enemy_x[i] += enemy_x_change[i]
+        if enemy_x[i] <= 0:
+            enemy_x_change[i] = 2
+            enemy_y[i] += enemy_y_change[i]
+        elif enemy_x[i] >= 736:
+            enemy_x_change[i] = -2
+            enemy_y[i] += enemy_y_change[i]
+        
+        # colission
+        colission = isCollision(enemy_x[i], enemy_y[i], laser_x, laser_y)
+        if colission:
+            laser_y = 480
+            laser_state = "ready"
+            score += 10
+            print(score)
+            enemy_x[i] = random.randint(0, 735)
+            enemy_y[i] = random.randint(50, 150)
+
+        enemy(enemy_x[i], enemy_y[i], i)
+
+
     #bullet movement
     if laser_y <= 0:
         laser_y = 480
@@ -106,13 +138,11 @@ while running:
     if laser_state == "fire":
         fire_laser(laser_x, laser_y)
         laser_y -= laser_y_change
-        
     
-
 
     # Player load 
     player(player_x, player_y)
-    enemy(enemy_x, enemy_y)
+    
 
     # always need that !!
     pygame.display.update()
