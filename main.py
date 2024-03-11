@@ -20,7 +20,24 @@ pygame.display.set_icon(icon)
 
 #score 
 
-score = 0
+score_value = 0
+font = pygame.font.Font("freesansbold.ttf", 32)
+
+text_x = 10
+text_y = 10
+
+def show_score(x,y):
+    score = font.render("Score: " + str(score_value), True, (255,255,255))
+    screen.blit(score, (x, y))
+
+
+#game over
+over_font = pygame.font.Font("freesansbold.ttf", 64)
+
+
+def game_over_text():
+    over_text = over_font.render("GAME OVER", True, (255,255,255))
+    screen.blit(over_text, (200, 250))
 
 # laser bullet
 laser_img = pygame.image.load("laser.png")
@@ -109,6 +126,16 @@ while running:
 
     # enemy movement
     for i in range(num_of_enemy):
+
+        # game over 
+        if enemy_y[i] > 440:
+            for j in range(num_of_enemy):
+                enemy_y[j] = 2000
+            game_over_text()
+            break
+            
+            
+
         enemy_x[i] += enemy_x_change[i]
         if enemy_x[i] <= 0:
             enemy_x_change[i] = 2
@@ -122,8 +149,7 @@ while running:
         if colission:
             laser_y = 480
             laser_state = "ready"
-            score += 10
-            print(score)
+            score_value += 10
             enemy_x[i] = random.randint(0, 735)
             enemy_y[i] = random.randint(50, 150)
 
@@ -142,8 +168,10 @@ while running:
 
     # Player load 
     player(player_x, player_y)
-    
+    show_score(text_x, text_y)
 
     # always need that !!
     pygame.display.update()
+
+
 
