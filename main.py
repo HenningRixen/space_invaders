@@ -30,6 +30,8 @@ def show_score(x,y):
     score = font.render("Score: " + str(score_value), True, (255,255,255))
     screen.blit(score, (x, y))
 
+#clock
+clock = pygame.time.Clock()
 
 #game win
 win_font = pygame.font.Font("freesansbold.ttf", 32)
@@ -88,11 +90,11 @@ fire_x = 330
 fire_y = 45
 fire_x_change = 0
 fire_y_change = 5
-fire_state = "ready"
+fireballs = []
+fireball_cooldown = 5
+fireball_timer = fireball_cooldown
 
-def dragon_fire(x,y):
-    global fire_state
-    fire_state = "fire"
+def fireball(x,y):
     screen.blit(fire_img, (x + 16, y + 10))
 
 def colission_dragon_fire(player_x, player_y, fire_x, fire_y):
@@ -177,36 +179,15 @@ while running:
             game_over_text()
             break
 
-        # Boss apearing   
-        if score_value >= 20:
-           for k in range(num_of_enemy):
-                #enemys away
-                enemy_y[k] = 3000
+        #game win
+        if score_value >= 50:
+            for j in range(num_of_enemy):
+                enemy_y[j] = 2000
+            game_win_text()
+            dragon_x = 2000
 
-                # dragon in 
-                dragon(dragon_x, dragon_y)
-    
-
+            break        
                 
-                # dragon colission
-                colission = is_Collision_Dragon(dragon_x, dragon_y, laser_x, laser_y)
-                if colission:
-                    laser_y = 480
-                    laser_state = "ready"
-                    score_value += 10
-                
-                # dead by fire
-                dead = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
-                if dead:
-                    dragon_x = 2000
-                    game_over_text()
-                    break
-                #game win
-                if score_value >= 600:
-                    game_win_text()
-                    dragon_x = 2000
-                    break
-
         enemy_x[i] += enemy_x_change[i]
         if enemy_x[i] <= 0:
             enemy_x_change[i] = 2
@@ -227,6 +208,22 @@ while running:
         enemy(enemy_x[i], enemy_y[i], i)
 
 
+    # dragon colission with laser 
+    colission = is_Collision_Dragon(dragon_x, dragon_y, laser_x, laser_y)
+    if colission:
+        laser_y = 480
+        laser_state = "ready"
+        score_value += 10
+                
+    # dead by fire
+    dead = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
+    if dead:
+        dragon_x = 2000
+        game_over_text()
+        
+                
+
+
     # dragon movement
     
     dragon_x += dragon_x_change
@@ -236,21 +233,25 @@ while running:
     elif dragon_x >= 690:
         dragon_x_change = -2
 
-    # dragon fire movement                  
-    if fire_state == "ready":
-        fire_x = dragon_x
-        dragon_fire(fire_x, fire_y)
-        fire_y -= fire_y_change
+    # dragon fire movement
+    fire_x = dragon_x
+    fireball(fire_x, fire_y)
 
-    if fire_y <= 600:
-        fire_y = 45
-        fire_state = "ready"
+    # dragon countdown fireball
+    
+    fireball_timer -= 5
+    if fireball_timer <= 0:
+        fire_y += fire_y_change
+        fireball_timer = fireball_cooldown
+    
+    
+        
 
-    if fire_state == "fire":
-        dragon_fire(fire_x, fire_y)
-        fire_y -= fire_y_change
+        
 
-    #bullet movement
+
+
+    #laser movement
     if laser_y <= 0:
         laser_y = 480
         laser_state = "ready"
@@ -263,7 +264,10 @@ while running:
     # Player load 
     player(player_x, player_y)
     show_score(text_x, text_y)
+    dragon(dragon_x, dragon_y)
 
+    #frame rate
+    clock.tick(120)
     # always need that !!
     pygame.display.update()
 
