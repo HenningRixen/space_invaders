@@ -90,7 +90,7 @@ fire_x = 330
 fire_y = 45
 fire_x_change = 0
 fire_y_change = 5
-fireball_cooldown = 20
+fireball_cooldown = 50
 fireball_timer = fireball_cooldown
 
 def fireball(x,y):
@@ -127,6 +127,7 @@ player_img = pygame.image.load("spaceship.png")
 player_x = 370
 player_y = 480
 player_x_change = 0
+player_health = 10
 
 def player(x, y):
     screen.blit(player_img, (x, y))
@@ -168,6 +169,7 @@ while running:
     elif player_x >= 736:
         player_x = 736
 
+
     # enemy movement
     for i in range(num_of_enemy):
 
@@ -178,14 +180,61 @@ while running:
             game_over_text()
             break
 
-        #game win
+        #dragon
         if score_value >= 50:
             for j in range(num_of_enemy):
                 enemy_y[j] = 2000
-            game_win_text()
-            dragon_x = 2000
-            break        
                 
+               
+                # call dragon
+                dragon(dragon_x, dragon_y)
+                
+                
+                #hit by fire
+                
+
+                hit = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
+                if hit:
+                    player_health -=10
+                    
+                    
+                if player_health <= 0:
+                    dragon_x = 2000
+                    game_over_text()
+                    break
+                
+
+                # dragon fire movement
+                
+                
+                fire_x = dragon_x
+                fireball(fire_x, fire_y)
+                # dragon countdown fireball
+                
+                fireball_timer -= 2
+                if fireball_timer <= 0:
+                    fire_y += fire_y_change
+                    fireball_timer = fireball_cooldown
+                
+                if fire_y >= 600:
+                    fire_y = 45
+                
+                # dragon colission with laser 
+                colission = is_Collision_Dragon(dragon_x, dragon_y, laser_x, laser_y)
+                if colission:
+                    laser_y = 480
+                    laser_state = "ready"
+                    score_value += 25
+         
+                
+                #game win
+
+                if score_value >= 150:
+                    dragon_x = 2000 
+                    fire_x = 2000
+                    game_win_text()
+                    break
+        
         enemy_x[i] += enemy_x_change[i]
         if enemy_x[i] <= 0:
             enemy_x_change[i] = 2
@@ -206,23 +255,6 @@ while running:
         enemy(enemy_x[i], enemy_y[i], i)
 
 
-    # dragon colission with laser 
-    colission = is_Collision_Dragon(dragon_x, dragon_y, laser_x, laser_y)
-    if colission:
-        laser_y = 480
-        laser_state = "ready"
-        score_value += 10
-                
-    # dead by fire
-    dead = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
-    if dead:
-        dragon_x = 2000
-        game_over_text()
-        break
-        
-                
-
-
     # dragon movement
     
     dragon_x += dragon_x_change
@@ -231,28 +263,7 @@ while running:
         
     elif dragon_x >= 690:
         dragon_x_change = -2
-
-    # dragon fire movement
-    fire_x = dragon_x
-    fireball(fire_x, fire_y)
-
-    # dragon countdown fireball
-    
-    fireball_timer -= 5
-    if fireball_timer <= 0:
-        fire_y += fire_y_change
-        fireball_timer = fireball_cooldown
-    
-    if fire_y >= 600:
-        fire_y = 45
-
-        
-    
-        
-
-        
-
-
+                
 
     #laser movement
     if laser_y <= 0:
@@ -267,7 +278,7 @@ while running:
     # Player load 
     player(player_x, player_y)
     show_score(text_x, text_y)
-    dragon(dragon_x, dragon_y)
+    
 
     #frame rate
     clock.tick(120)
