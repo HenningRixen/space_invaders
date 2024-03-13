@@ -132,6 +132,7 @@ player_health = 10
 def player(x, y):
     screen.blit(player_img, (x, y))
 
+
 # game loop
 running = True
 while running:
@@ -181,7 +182,7 @@ while running:
             break
 
         #dragon
-        if score_value >= 50:
+        if score_value >= 700:
             for j in range(num_of_enemy):
                 enemy_y[j] = 2000
                 
@@ -190,14 +191,12 @@ while running:
                 dragon(dragon_x, dragon_y)
                 
                 
-                #hit by fire
-                
+                #hit by fire and dead
 
                 hit = colission_dragon_fire(player_x, player_y, fire_x, fire_y)
                 if hit:
                     player_health -=10
-                    
-                    
+
                 if player_health <= 0:
                     dragon_x = 2000
                     game_over_text()
@@ -205,12 +204,10 @@ while running:
                 
 
                 # dragon fire movement
-                
-                
                 fire_x = dragon_x
                 fireball(fire_x, fire_y)
+
                 # dragon countdown fireball
-                
                 fireball_timer -= 2
                 if fireball_timer <= 0:
                     fire_y += fire_y_change
@@ -228,8 +225,7 @@ while running:
          
                 
                 #game win
-
-                if score_value >= 150:
+                if score_value >= 1500:
                     dragon_x = 2000 
                     fire_x = 2000
                     game_win_text()
@@ -278,7 +274,6 @@ while running:
     # Player load 
     player(player_x, player_y)
     show_score(text_x, text_y)
-    
 
     #frame rate
     clock.tick(120)
