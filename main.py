@@ -90,8 +90,7 @@ fire_x = 330
 fire_y = 45
 fire_x_change = 0
 fire_y_change = 5
-fireballs = []
-fireball_cooldown = 5
+fireball_cooldown = 20
 fireball_timer = fireball_cooldown
 
 def fireball(x,y):
@@ -185,7 +184,6 @@ while running:
                 enemy_y[j] = 2000
             game_win_text()
             dragon_x = 2000
-
             break        
                 
         enemy_x[i] += enemy_x_change[i]
@@ -220,6 +218,7 @@ while running:
     if dead:
         dragon_x = 2000
         game_over_text()
+        break
         
                 
 
@@ -244,6 +243,10 @@ while running:
         fire_y += fire_y_change
         fireball_timer = fireball_cooldown
     
+    if fire_y >= 600:
+        fire_y = 45
+
+        
     
         
 
